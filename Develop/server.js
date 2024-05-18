@@ -37,11 +37,43 @@ app.post('/api/notes', (req, res) => {
     res.json({ "message": "Success" });
 });
 
-/*
-app.delete('api/notes', (req, res) => {
 
+app.delete('api/notes/:id', (req, res) => {
+    /*
+    fs.readFile(dbFilePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        let notes = JSON.parse(data);
+        const noteId = req.params.id;
+
+        // Find the index of the note with the provided ID
+        const noteIndex = notes.findIndex(note => note.id === noteId);
+
+        if (noteIndex === -1) {
+            res.status(404).json({ error: 'Note not found' });
+            return;
+        }
+
+        // Remove the note from the array
+        notes.splice(noteIndex, 1);
+
+        // Write the updated notes back to the db.json file
+        fs.writeFile(dbFilePath, JSON.stringify(notes, null, 2), err => {
+            if (err) {
+                console.error(err);
+                res.status(500).json({ error: 'Internal Server Error' });
+                return;
+            }
+
+            res.json({ message: 'Note deleted successfully' });
+        });
+    });*/
 })
-*/
+
 
 app.listen(PORT, () => {
     console.log(`App listening at http://localhost:${PORT}`);
