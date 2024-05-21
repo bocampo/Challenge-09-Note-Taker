@@ -1,9 +1,10 @@
 const express = require('express');
 const path = require('path');
-const { readFromFile, readAndAppend } = require('../helpers/fsUtils');
-//const api = require('./routes/api');
+const { readFromFile, readAndAppend, writeToFile } = require('./helpers/fsUtils');
+const { readFile, writeFile } = require('fs').promises;
 
 const fs = require('fs');
+const { randomUUID } = require('crypto');
 
 const PORT = 3001;
 
@@ -32,46 +33,33 @@ app.post('/api/notes', (req, res) => {
     console.info(`${req.method} received`);
     const { title, text } = req.body;
 
-    readAndAppend({ "title": title, "text": text }, './db/db.json');
+    readAndAppend({ "title": title, "text": text, "id": crypto.randomUUID() }, './db/db.json');
 
     res.json({ "message": "Success" });
 });
 
 
-app.delete('api/notes/:id', (req, res) => {
-    /*
-    fs.readFile(dbFilePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal Server Error' });
-            return;
+app.delete('/api/notes/:id', (req, res) => {
+
+    readFile('./db/db.json', 'utf8').then((data) => {
+
+        const parseData = JSON.parse(data);
+
+        const newData = parseData.filter(note => {
+            console.log(note.id);
+            return req.params.id != note.id
         }
 
-        let notes = JSON.parse(data);
-        const noteId = req.params.id;
+        );
+        console.log(newData);
 
-        // Find the index of the note with the provided ID
-        const noteIndex = notes.findIndex(note => note.id === noteId);
-
-        if (noteIndex === -1) {
-            res.status(404).json({ error: 'Note not found' });
-            return;
-        }
-
-        // Remove the note from the array
-        notes.splice(noteIndex, 1);
-
-        // Write the updated notes back to the db.json file
-        fs.writeFile(dbFilePath, JSON.stringify(notes, null, 2), err => {
-            if (err) {
-                console.error(err);
-                res.status(500).json({ error: 'Internal Server Error' });
-                return;
-            }
-
-            res.json({ message: 'Note deleted successfully' });
-        });
-    });*/
+        writeFile('./db/db.json', JSON.stringify(newData))
+            .then(() => {
+                res.json(newData);
+            }).catch(err => {
+                console.log(err);
+            });
+    });
 })
 
 
